@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://github.com/thisisiliya/httpr/assets/66384228/fdcc9f64-dd38-4f65-b597-1074c17720d1" width="400px">
+  <img src="https://github.com/thisisiliya/httpr/assets/66384228/087bf6e3-4d03-414b-b95a-fbeb034eda9d" width="400px">
   <br>
   HTTPR is an OSINT tool to Scrape the Undisclosed Data via Search Engines
   <br>
@@ -10,6 +10,7 @@
 </p>
 
 # Modes
+
 - [sub](#sub-mode) - algorithmic subdomain enumeration for domains
 - [key](#key-mode) - keywords enumeration for domains
 - [path](#path-mode) - path enumeration for domains
