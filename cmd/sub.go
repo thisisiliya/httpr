@@ -20,8 +20,9 @@ var (
 	subShowSub bool
 	subShowURL bool
 
-	blockKeys   [][]string
-	dividedKeys [][]string
+	checked_result []string
+	blockKeys      [][]string
+	dividedKeys    [][]string
 
 	subCmd = &cobra.Command{
 		Use:   "sub",
@@ -83,6 +84,19 @@ func subEnum() {
 		} else {
 
 			break
+		}
+	}
+
+	if subAll {
+
+		for _, domain := range results {
+
+			if !slices.Contains(checked_result, domain) {
+
+				opt.Domain = domain
+				checked_result = append(checked_result, domain)
+				subEnum()
+			}
 		}
 	}
 }
