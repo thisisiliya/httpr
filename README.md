@@ -40,7 +40,7 @@ Flags:
 ```
 ### Example
 ```
->>> httpr sub -d google.com --silent
+>>> httpr sub -d google.com --all --silent
 
 lookerstudio.google.com
 earth.google.com
