@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/thisisiliya/httpr/pkg/start"
-
 	"github.com/spf13/cobra"
+	"github.com/thisisiliya/httpr/pkg/utils"
 )
 
 var versionCmd = &cobra.Command{
@@ -14,7 +13,7 @@ var versionCmd = &cobra.Command{
 	Short: "display httpr's version and exit",
 	Run: func(_ *cobra.Command, _ []string) {
 
-		fmt.Fprintln(os.Stderr, start.VERSION)
+		fmt.Fprintln(os.Stderr, utils.VERSION)
 	},
 }
 

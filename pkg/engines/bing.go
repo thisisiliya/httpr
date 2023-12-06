@@ -5,18 +5,11 @@ import (
 	"strconv"
 )
 
-func GoogleURL(options *Options) string {
+func BingURL(options *Options) string {
 
 	var command string
 
-	switch true {
-
-	case options.Wildcard:
-		command = "site:*." + options.Domain
-
-	default:
-		command = "site:" + options.Domain
-	}
+	command = "site:" + options.Domain
 
 	if options.Filetype != "" {
 		command = command + " filetype:" + options.Filetype
@@ -33,15 +26,16 @@ func GoogleURL(options *Options) string {
 	}
 
 	options.Command = command
-	return GoogleURLEncode(options)
+
+	return BingURLEncode(options)
 }
 
-func GoogleURLEncode(options *Options) string {
+func BingURLEncode(options *Options) string {
 
 	values := url.Values{}
 
 	values.Add("q", options.Command)
-	values.Add("start", strconv.Itoa(options.Page*10))
+	values.Add("first", strconv.Itoa((options.Page*10)+1))
 
-	return "https://www.google.com/search?" + values.Encode()
+	return "https://www.bing.com/search?" + values.Encode()
 }

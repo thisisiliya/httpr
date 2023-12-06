@@ -3,102 +3,101 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/thisisiliya/httpr/pkg/engines"
-	"github.com/thisisiliya/httpr/pkg/extract"
-	"github.com/thisisiliya/httpr/pkg/start"
-	"github.com/thisisiliya/httpr/pkg/validate"
-
 	"github.com/spf13/cobra"
+	"github.com/thisisiliya/go_utils/errors"
+	"github.com/thisisiliya/go_utils/file"
+	"github.com/thisisiliya/httpr/pkg/request"
+	"github.com/thisisiliya/httpr/pkg/engines"
+	"github.com/thisisiliya/httpr/pkg/request/validate"
+	"github.com/thisisiliya/httpr/pkg/utils"
 	"golang.org/x/exp/slices"
 )
 
-var (
-	pathDomain   string
-	pathDomains  string
-	pathDepth    int
-	pathShowPath bool
+var pathCmd = &cobra.Command{
+	Use:     "path",
+	Short:   "path enumeration for domains",
+	Long:    "path enumeration for domain(s)",
+	Example: "usage: --domain www.google.com --depth 10",
+	Run:     PathExt,
+}
 
-	pathCmd = &cobra.Command{
-		Use:   "path",
-		Short: "path enumeration for domains",
-		Long: ("\npath enumeration for domain(s)" +
-			"\nusage: -d www.google.com --depth 20"),
-		Run: pathExt,
-	}
-)
+func PathExt(_ *cobra.Command, _ []string) {
 
-func pathExt(_ *cobra.Command, _ []string) {
+	ctx, cancel1, cancel2 = utils.Start(root_Proxy, root_Silent)
+	defer cancel1()
+	defer cancel2()
 
-	start.Start(rootCmd)
+	o.MinDelay = i.root_MinDelay
+	o.MaxDelay = i.root_MaxDelay
+	o.Engines = append(o.Engines,
+		engines.GoogleURL,
+		engines.BingURL,
+		engines.YahooURL,
+	)
 
 	switch {
 
-	case pathDomain != "":
-		opt.Domain = pathDomain
-		pathEnum()
+	case i.path_Domain != "":
+		o.Dork.Domain = i.path_Domain
+		PathEnum()
 
-	case pathDomains != "":
-		for _, domain := range extract.ReadFile(pathDomains) {
+	case i.path_Domains != "":
+		path_domains, err := file.ReadByLine(i.path_Domains)
+		errors.Check(err)
 
-			opt.Domain = domain
-			pathEnum()
+		for _, domain := range *path_domains {
+
+			o.Dork.Domain = domain
+			PathEnum()
 		}
 	}
 }
 
-func pathEnum() {
+func PathEnum() {
 
-	opt.Page = 0
+	o.Dork.Page = 0
+	var data []request.Data
 
-	for opt.Page < pathDepth {
+	for o.Dork.Page < i.path_Depth {
 
-		wg.Add(1)
-
-		go func() {
-
-			defer wg.Done()
-
-			URL = engines.GoogleURL(&opt)
-
-			for _, r := range *extract.Scrape(URL, opt.Domain, rootRetry, extract.GoogleExt) {
-
-				if pathValidate(r) {
-
-					switch true {
-
-					case pathShowPath:
-						fmt.Println(r.Path)
-
-					default:
-						fmt.Println(r.URL)
-					}
-				}
-			}
-		}()
-
-		opt.Page++
-		start.Sleep(rootCmd)
+		request.Scrape(&o, &data, &wg, &ctx)
+		o.Dork.Page++
 	}
 
 	wg.Wait()
+
+	for _, d := range data {
+
+		if PathValidate(&d) {
+
+			switch true {
+
+			case i.path_ShowPath:
+				fmt.Println(d.Path)
+
+			default:
+				fmt.Println(d.URL)
+			}
+		}
+	}
 }
 
-func pathValidate(d extract.Data) bool {
+func PathValidate(data *request.Data) bool {
 
-	if d.Host == opt.Domain || d.Host == "www."+opt.Domain {
+	if data.Host == o.Dork.Domain || data.Host == "www."+o.Dork.Domain {
 
-		if !slices.Contains(results, d.Path) {
+		if !slices.Contains(results, data.Path) {
 
-			if rootVerify {
+			if i.root_Verify {
 
-				if validate.Verify(d.URL) {
+				if validate.Verify(data.URL) {
 
-					results = append(results, d.Path)
+					results = append(results, data.Path)
 					return true
 				}
 			} else {
 
-				results = append(results, d.Path)
+				results = append(results, data.Path)
 				return true
 			}
 		}
@@ -111,10 +110,12 @@ func init() {
 
 	rootCmd.AddCommand(pathCmd)
 
-	pathCmd.Flags().StringVarP(&pathDomain, "domain", "d", "", "target domain to search")
-	pathCmd.Flags().StringVar(&pathDomains, "domains", "", "target domains file path")
-	pathCmd.Flags().IntVar(&pathDepth, "depth", 20, "number of pages to scrape per domain")
-	pathCmd.Flags().BoolVar(&pathShowPath, "show-path", false, "show paths as result")
+	pathCmd.Flags().StringVarP(&i.path_Domain, "domain", "d", "", "target domain to search")
+	pathCmd.Flags().StringVar(&i.path_Domains, "domains", "", "target domains file path")
+	pathCmd.Flags().IntVar(&i.path_Depth, "depth", 10, "number of pages to scrape per domain")
+	pathCmd.Flags().BoolVar(&i.path_ShowPath, "show-path", false, "show paths as result")
 
+	pathCmd.MarkFlagsOneRequired("domain", "domains")
 	pathCmd.MarkFlagsMutuallyExclusive("domain", "domains")
+	pathCmd.MarkFlagDirname("domains")
 }

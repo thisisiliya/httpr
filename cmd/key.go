@@ -3,143 +3,147 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/thisisiliya/httpr/pkg/engines"
-	"github.com/thisisiliya/httpr/pkg/extract"
-	"github.com/thisisiliya/httpr/pkg/start"
-	"github.com/thisisiliya/httpr/pkg/validate"
-
 	"github.com/spf13/cobra"
+	"github.com/thisisiliya/go_utils/errors"
+	"github.com/thisisiliya/go_utils/file"
+	"github.com/thisisiliya/httpr/pkg/engines"
+	"github.com/thisisiliya/httpr/pkg/request"
+	"github.com/thisisiliya/httpr/pkg/request/validate"
+	"github.com/thisisiliya/httpr/pkg/utils"
 	"golang.org/x/exp/slices"
 )
 
-var (
-	keyDomain   string
-	keyDomains  string
-	keyKeyword  string
-	keyKeywords string
-	keyDepth    int
-	keyShowHost bool
-	keyShowPath bool
-	keyShowSub  bool
+var keyCmd = &cobra.Command{
+	Use:     "key",
+	Short:   "keywords enumeration for domains",
+	Long:    "keyword(s) enumeration for domain(s)",
+	Example: "httpr key --domain www.google.com --keyword exploit --depth 3",
+	Run:     KeyExt,
+}
 
-	keyCmd = &cobra.Command{
-		Use:   "key",
-		Short: "keywords enumeration for domains",
-		Long: ("\nkeyword(s) enumeration for domain(s)" +
-			"\nusage: -d www.google.com -k exploit --depth 3"),
-		Run: keyExt,
-	}
-)
+func KeyExt(_ *cobra.Command, _ []string) {
 
-func keyExt(_ *cobra.Command, _ []string) {
+	ctx, cancel1, cancel2 = utils.Start(root_Proxy, root_Silent)
+	defer cancel1()
+	defer cancel2()
 
-	start.Start(rootCmd)
+	o.MinDelay = i.root_MinDelay
+	o.MaxDelay = i.root_MaxDelay
+	o.Engines = append(o.Engines,
+		engines.GoogleURL,
+		engines.BingURL,
+		engines.YahooURL,
+	)
 
 	switch {
 
-	case keyDomain != "":
-		opt.Domain = keyDomain
+	case i.key_Domain != "":
+		o.Dork.Domain = i.key_Domain
 
 		switch {
 
-		case keyKeyword != "":
-			opt.Key = keyKeyword
-			keyEnum()
+		case i.key_Keyword != "":
+			o.Dork.Key = i.key_Keyword
+			KeyEnum()
 
-		case keyKeywords != "":
-			for _, key := range extract.ReadFile(keyKeywords) {
+		case i.key_Keywords != "":
+			keywords, err := file.ReadByLine(i.key_Keywords)
+			errors.Check(err)
 
-				opt.Key = key
-				keyEnum()
+			for _, key := range *keywords {
+
+				o.Dork.Key = key
+				KeyEnum()
 			}
 		}
 
-	case keyDomains != "":
+	case i.key_Domains != "":
 		switch {
 
-		case keyKeyword != "":
-			opt.Key = keyKeyword
+		case i.key_Keyword != "":
+			o.Dork.Key = i.key_Keyword
 
-			for _, domain := range extract.ReadFile(keyDomains) {
+			key_domains, err := file.ReadByLine(i.key_Domains)
+			errors.Check(err)
 
-				opt.Domain = domain
-				keyEnum()
+			for _, domain := range *key_domains {
+
+				o.Dork.Domain = domain
+				KeyEnum()
 			}
 
-		case keyKeywords != "":
-			for _, domain := range extract.ReadFile(keyDomains) {
+		case i.key_Keywords != "":
+			key_domains, err := file.ReadByLine(i.key_Domains)
+			errors.Check(err)
 
-				opt.Domain = domain
+			for _, domain := range *key_domains {
 
-				for _, key := range extract.ReadFile(keyKeywords) {
+				o.Dork.Domain = domain
 
-					opt.Key = key
-					keyEnum()
+				key_keywords, err := file.ReadByLine(i.key_Domains)
+				errors.Check(err)
+
+				for _, key := range *key_keywords {
+
+					o.Dork.Key = key
+					KeyEnum()
 				}
 			}
 		}
 	}
 }
 
-func keyEnum() {
+func KeyEnum() {
 
-	opt.Page = 0
+	o.Dork.Page = 0
+	var data []request.Data
 
-	for opt.Page < keyDepth {
+	for o.Dork.Page < i.key_Depth {
 
-		wg.Add(1)
-
-		go func() {
-
-			defer wg.Done()
-
-			URL = engines.GoogleURL(&opt)
-
-			for _, r := range *extract.Scrape(URL, opt.Domain, rootRetry, extract.GoogleExt) {
-
-				if keyValidate(r) {
-
-					switch true {
-
-					case customShowHost:
-						fmt.Println(r.Host)
-
-					case customShowPath:
-						fmt.Println(r.Path)
-
-					case customShowSub:
-						fmt.Println(r.Subdomain)
-
-					default:
-						fmt.Println(r.URL)
-					}
-				}
-			}
-		}()
-
-		opt.Page++
-		start.Sleep(rootCmd)
+		request.Scrape(&o, &data, &wg, &ctx)
+		o.Dork.Page++
 	}
 
 	wg.Wait()
+
+	for _, d := range data {
+
+		if KeyValidate(&d) {
+
+			switch true {
+
+			case i.custom_ShowHost:
+				fmt.Println(d.Host)
+
+			case i.custom_ShowPath:
+				fmt.Println(d.Path)
+
+			case i.custom_ShowSub:
+				fmt.Println(d.Subdomain)
+
+			default:
+				fmt.Println(d.URL)
+			}
+		}
+	}
 }
 
-func keyValidate(d extract.Data) bool {
+func KeyValidate(data *request.Data) bool {
 
-	if d.Host == opt.Domain || d.Host == "www."+opt.Domain {
+	if data.Host == o.Dork.Domain || data.Host == "www."+o.Dork.Domain {
 
-		if !slices.Contains(results, d.URL) {
+		if !slices.Contains(results, data.URL) {
 
-			if rootVerify {
+			if i.root_Verify {
 
-				if validate.Verify(d.URL) {
+				if validate.Verify(data.URL) {
 
-					results = append(results, d.URL)
+					results = append(results, data.URL)
 					return true
 				}
 			} else {
 
-				results = append(results, d.URL)
+				results = append(results, data.URL)
 				return true
 			}
 		}
@@ -152,15 +156,22 @@ func init() {
 
 	rootCmd.AddCommand(keyCmd)
 
-	keyCmd.Flags().StringVarP(&keyDomain, "domain", "d", "", "target domain to search keyword(s)")
-	keyCmd.Flags().StringVar(&keyDomains, "domains", "", "target domains file path")
-	keyCmd.Flags().StringVarP(&keyKeyword, "keyword", "k", "", "target keyword to search")
-	keyCmd.Flags().StringVar(&keyKeywords, "keywords", "", "target keywords path")
-	keyCmd.Flags().IntVar(&keyDepth, "depth", 3, "number of pages to scrape per key")
-	keyCmd.Flags().BoolVar(&keyShowHost, "show-host", false, "show hosts as result")
-	keyCmd.Flags().BoolVar(&keyShowSub, "show-sub", false, "show subdomains as result")
-	keyCmd.Flags().BoolVar(&keyShowPath, "show-path", false, "show paths as result")
+	keyCmd.AddGroup()
 
+	keyCmd.Flags().StringVarP(&i.key_Domain, "domain", "d", "", "target domain to search keyword(s)")
+	keyCmd.Flags().StringVar(&i.key_Domains, "domains", "", "target domains file path")
+	keyCmd.Flags().StringVarP(&i.key_Keyword, "keyword", "k", "", "target keyword to search")
+	keyCmd.Flags().StringVar(&i.key_Keywords, "keywords", "", "target keywords path")
+	keyCmd.Flags().IntVar(&i.key_Depth, "depth", 3, "number of pages to scrape per key")
+	keyCmd.Flags().BoolVar(&i.key_ShowHost, "show-host", false, "show hosts as result")
+	keyCmd.Flags().BoolVar(&i.key_ShowSub, "show-sub", false, "show subdomains as result")
+	keyCmd.Flags().BoolVar(&i.key_ShowPath, "show-path", false, "show paths as result")
+
+	keyCmd.MarkFlagsOneRequired("domain", "domains")
 	keyCmd.MarkFlagsMutuallyExclusive("domain", "domains")
+	keyCmd.MarkFlagsOneRequired("keyword", "keywords")
 	keyCmd.MarkFlagsMutuallyExclusive("keyword", "keywords")
+	keyCmd.MarkFlagsMutuallyExclusive("show-host", "show-sub", "show-path")
+	keyCmd.MarkFlagDirname("domains")
+	keyCmd.MarkFlagDirname("keywords")
 }

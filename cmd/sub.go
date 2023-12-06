@@ -3,66 +3,74 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/thisisiliya/httpr/pkg/engines"
-	"github.com/thisisiliya/httpr/pkg/extract"
-	"github.com/thisisiliya/httpr/pkg/start"
-	"github.com/thisisiliya/httpr/pkg/validate"
-
 	"github.com/spf13/cobra"
+	"github.com/thisisiliya/go_utils/errors"
+	"github.com/thisisiliya/go_utils/file"
+	"github.com/thisisiliya/httpr/pkg/engines"
+	"github.com/thisisiliya/httpr/pkg/request"
+	"github.com/thisisiliya/httpr/pkg/request/validate"
+	"github.com/thisisiliya/httpr/pkg/utils"
 	"golang.org/x/exp/slices"
 )
 
 var (
-	subDomain  string
-	subDomains string
-	subDepth   int
-	subAll     bool
-	subShowSub bool
-	subShowURL bool
-
-	checked_result []string
-	blockKeys      [][]string
-	dividedKeys    [][]string
+	mainDomain    string
+	checkedResult []string
 
 	subCmd = &cobra.Command{
-		Use:   "sub",
-		Short: "algorithmic subdomain enumeration for domains",
-		Long: ("\nalgorithmic subdomain enumeration for domain(s)" +
-			"\nusage: -d google.com"),
-		Run: subExt,
+		Use:     "sub",
+		Short:   "algorithmic subdomain enumeration for domains",
+		Long:    "algorithmic subdomain enumeration for domain(s)",
+		Example: "httpr sub --domain google.com --all",
+		Run:     SubExt,
 	}
 )
 
-func subExt(_ *cobra.Command, _ []string) {
+func SubExt(_ *cobra.Command, _ []string) {
 
-	start.Start(rootCmd)
-	opt.Wildcard = true
+	ctx, cancel1, cancel2 = utils.Start(root_Proxy, root_Silent)
+	defer cancel1()
+	defer cancel2()
+
+	o.MinDelay = i.root_MinDelay
+	o.MaxDelay = i.root_MaxDelay
+	o.Dork.Wildcard = true
+	o.Engines = append(o.Engines,
+		engines.GoogleURL,
+		engines.BingURL,
+		engines.YahooURL,
+	)
 
 	switch {
 
-	case subDomain != "":
-		opt.Domain = subDomain
-		subEnum()
+	case i.sub_Domain != "":
+		mainDomain = i.sub_Domain
+		o.Dork.Domain = mainDomain
+		SubEnum()
 
-	case subDomains != "":
-		for _, domain := range extract.ReadFile(subDomains) {
+	case i.sub_Domains != "":
 
-			opt.Domain = domain
-			subEnum()
+		sub_domains, err := file.ReadByLine(i.sub_Domains)
+		errors.Check(err)
+
+		for _, domain := range *sub_domains {
+
+			mainDomain = domain
+			o.Dork.Domain = mainDomain
+			SubEnum()
 		}
 	}
 }
 
-func subEnum() {
+func SubEnum() {
 
-	blockKeys = [][]string{}
-	dividedKeys = [][]string{}
+	var blockKeys [][]string
 
-	subScrape()
+	SubScrape()
 
 	for {
 
-		dividedKeys = divideKeys(results)
+		dividedKeys := DivideKeys(results)
 
 		if len(blockKeys) != len(dividedKeys) {
 
@@ -75,8 +83,8 @@ func subEnum() {
 
 				if len(blockKeys[i]) != len(v) {
 
-					opt.Block = v
-					subScrape()
+					o.Dork.Block = v
+					SubScrape()
 				}
 			}
 
@@ -87,61 +95,79 @@ func subEnum() {
 		}
 	}
 
-	if subAll {
+	if i.sub_All {
 
-		for _, domain := range results {
+		for _, subdomain := range results {
 
-			if !slices.Contains(checked_result, domain) {
+			if !slices.Contains(checkedResult, subdomain) {
 
-				opt.Domain = domain
-				checked_result = append(checked_result, domain)
-				subEnum()
+				o.Dork.Domain = subdomain + "." + mainDomain
+				checkedResult = append(checkedResult, subdomain)
+				SubEnum()
 			}
 		}
 	}
 }
 
-func subScrape() {
+func SubScrape() {
 
-	opt.Page = 0
+	o.Dork.Page = 0
+	var data []request.Data
 
-	for opt.Page < subDepth {
+	for o.Dork.Page < i.sub_Depth {
 
-		wg.Add(1)
+		request.Scrape(&o, &data, &wg, &ctx)
+		wg.Wait()
 
-		go func() {
+		for _, d := range data {
 
-			defer wg.Done()
+			if SubValidate(&d) {
 
-			URL = engines.GoogleURL(&opt)
+				switch true {
 
-			for _, r := range *extract.Scrape(URL, opt.Domain, rootRetry, extract.GoogleExt) {
+				case i.sub_ShowSub:
+					fmt.Println(d.Subdomain)
 
-				if subValidate(r) {
+				case i.sub_ShowURL:
+					fmt.Println(d.URL)
 
-					switch true {
-
-					case subShowSub:
-						fmt.Println(r.Subdomain)
-
-					case subShowURL:
-						fmt.Println(r.URL)
-
-					default:
-						fmt.Println(r.Host)
-					}
+				default:
+					fmt.Println(d.Host)
 				}
 			}
-		}()
+		}
 
-		opt.Page++
-		start.Sleep(rootCmd)
+		o.Dork.Page++
 	}
 
-	wg.Wait()
+	data = []request.Data{}
 }
 
-func divideKeys(list []string) [][]string {
+func SubValidate(d *request.Data) bool {
+
+	if d.Subdomain != "" {
+
+		if !slices.Contains(results, d.Subdomain) {
+
+			if i.root_Verify {
+
+				if validate.Verify(d.URL) {
+
+					results = append(results, d.Subdomain)
+					return true
+				}
+			} else {
+
+				results = append(results, d.Subdomain)
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+func DivideKeys(list []string) [][]string {
 
 	n := 5
 	r := [][]string{}
@@ -160,41 +186,19 @@ func divideKeys(list []string) [][]string {
 	return r
 }
 
-func subValidate(d extract.Data) bool {
-
-	if d.Subdomain != "" {
-
-		if !slices.Contains(results, d.Subdomain) {
-
-			if rootVerify {
-
-				if validate.Verify(d.URL) {
-
-					results = append(results, d.Subdomain)
-					return true
-				}
-			} else {
-
-				results = append(results, d.Subdomain)
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
 func init() {
 
 	rootCmd.AddCommand(subCmd)
 
-	subCmd.Flags().StringVarP(&subDomain, "domain", "d", "", "target domain to search subdomains")
-	subCmd.Flags().StringVar(&subDomains, "domains", "", "target domains file path")
-	subCmd.Flags().IntVar(&subDepth, "depth", 5, "number of pages to scrape per result")
-	subCmd.Flags().BoolVarP(&subAll, "all", "a", false, "redo the process for the result")
-	subCmd.Flags().BoolVar(&subShowSub, "show-sub", false, "show subdomains as result")
-	subCmd.Flags().BoolVar(&subShowURL, "show-url", false, "show URLs as result")
+	subCmd.Flags().StringVarP(&i.sub_Domain, "domain", "d", "", "target domain to search subdomains")
+	subCmd.Flags().StringVar(&i.sub_Domains, "domains", "", "target domains file path")
+	subCmd.Flags().IntVar(&i.sub_Depth, "depth", 5, "number of pages to scrape per result")
+	subCmd.Flags().BoolVarP(&i.sub_All, "all", "a", false, "redo the process for the result")
+	subCmd.Flags().BoolVar(&i.sub_ShowSub, "show-sub", false, "show subdomains as result")
+	subCmd.Flags().BoolVar(&i.sub_ShowURL, "show-url", false, "show URLs as result")
 
+	subCmd.MarkFlagsOneRequired("domain", "domains")
 	subCmd.MarkFlagsMutuallyExclusive("domain", "domains")
 	subCmd.MarkFlagsMutuallyExclusive("show-sub", "show-url")
+	subCmd.MarkFlagDirname("domains")
 }
