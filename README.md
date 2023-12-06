@@ -125,7 +125,7 @@ httpr custom --command "site:*.hackerone.com inurl:report" --target-host hackero
 Flags:
   -c, --command string       dork command to scrape
       --depth int            number of pages to scrape (default 1)
-  -e, --engine string        target engine to scrape. available engines:Google, Bing, Yahoo (default "Google")
+  -e, --engine string        target engine to scrape. available engines: Google, Bing, Yahoo (default "Google")
   -h, --help                 help for custom
       --show-host            show hosts as result
       --show-path            show paths as result
@@ -145,11 +145,11 @@ https://www.hackerone.com/reports/7th-annual-hacker-powered-security-report
 # Installation
 1. Go easy installation:
 ```bash
-go install github.com/thisisiliya/httpr@lastest
+go install github.com/thisisiliya/httpr@v1.0.0
 ```
 Note that you need at least *go 1.20v* to compile httpr
 
-2. Download the windows version for [release](https://github.com/thisisiliya/httpr/releases)
+2. Download the Windows version for [release](https://github.com/thisisiliya/httpr/releases)
 
 3. Or compile it from the [Source code](https://github.com/thisisiliya/httpr/releases) file
 
@@ -158,7 +158,7 @@ Note that you need at least *go 1.20v* to compile httpr
 - New modes
 
 # Support
-Support me by a ⭐
+Support me with a ⭐
 
 # License
 Please visit [License](https://github.com/thisisiliya/httpr/blob/main/LICENSE) file
