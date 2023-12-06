@@ -145,7 +145,7 @@ https://www.hackerone.com/reports/7th-annual-hacker-powered-security-report
 # Installation
 1. Go easy installation:
 ```bash
-go install github.com/thisisiliya/httpr@v1.0.0
+go install github.com/thisisiliya/httpr@latest
 ```
 Note that you need at least *go 1.20v* to compile httpr
 
