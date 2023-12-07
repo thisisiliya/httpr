@@ -2,14 +2,11 @@
   <img src="https://github.com/thisisiliya/httpr/assets/66384228/5495f1de-eebd-4fb3-a540-3c2af81f248b" width="500px">
   <br>
   Advanced search engines’ OSINT tool designed for Hunters
-  <br>
-  Available Engines: Google, Bing & Yahoo
 </h3>
 <p align="center">
   <a href="#key-features">Key Features</a> .
   <a href="#installation">Installation</a> .
-  <a href="#modes">Modes</a> .
-  <a href="#usage-guide">Usage Guide</a> .
+  <a href="#modes">Modes/Usage Guide</a> .
   <a href="#next-features">Next Features</a> .
   <a href="#support">Support</a> .
   <a href="#license">License</a>
@@ -45,10 +42,8 @@ Note that you need at least *go 1.20v* to compile httpr
 - [path](#path-mode) - path enumeration for domains
 - [custom](custom-mode) - custom dork command to scrape
 
-## Usage Guide
-
-### `sub` Mode
-#### Options
+## `sub` Mode
+### Options
 ```
 >>> httpr help sub
 algorithmic subdomain enumeration for domain(s)
@@ -68,7 +63,7 @@ Flags:
       --show-sub         show subdomains as result
       --show-url         show URLs as result
 ```
-#### Example
+### Example
 ```
 >>> httpr sub -d hackerone.com -a --silent
 www.hackerone.com
@@ -77,8 +72,8 @@ api.hackerone.com
 ...
 ```
 
-### `key` Mode
-#### Options
+## `key` Mode
+### Options
 ```
 >>> httpr help key
 keyword(s) enumeration for domain(s)
@@ -100,7 +95,7 @@ Flags:
       --show-path         show paths as result
       --show-sub          show subdomains as result
 ```
-#### Example
+### Example
 ```
 >>> httpr key -d hackerone.com -k report --silent
 https://hackerone.com/reports/647130
@@ -109,8 +104,8 @@ https://www.hackerone.com/hacker-powered-security-report-0
 ...
 ```
 
-### `path` Mode
-#### Options
+## `path` Mode
+### Options
 ```
 >>> httpr help path
 path enumeration for domain(s)
@@ -128,7 +123,7 @@ Flags:
   -h, --help             help for path
       --show-path        show paths as result
 ```
-#### Example 
+### Example 
 ```
 >>> httpr path -d hackerone.com --silent
 https://hackerone.com/enter
@@ -137,8 +132,8 @@ https://hackerone.com/rockstargames
 ...
 ```
 
-### `custom` Mode
-#### Options
+## `custom` Mode
+### Options
 ```
 >>> httpr help custom
 engine page(s) scrape by custom dork commands
@@ -160,7 +155,7 @@ Flags:
       --split-by string      dork commands split character (default " ")
   -t, --target-host string   filter result by host
 ```
-#### Example
+### Example
 ```
 >>> httpr custom -c "site:*.hackerone.com inurl:report" --target-host hackerone.com --silent
 https://docs.hackerone.com/en/articles/8475030-report-states
