@@ -40,7 +40,7 @@ Note that you need at least *go 1.20v* to compile httpr
 - [sub](#sub-mode) - algorithmic subdomain enumeration for domains
 - [key](#key-mode) - keywords enumeration for domains
 - [path](#path-mode) - path enumeration for domains
-- [custom](custom-mode) - custom dork command to scrape
+- [custom](#custom-mode) - custom dork command to scrape
 
 ## `sub` Mode
 ### Options
