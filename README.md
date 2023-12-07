@@ -1,15 +1,42 @@
+<h3 align="center">
+  <img src="https://github.com/thisisiliya/httpr/assets/66384228/5495f1de-eebd-4fb3-a540-3c2af81f248b" width="500px">
+  <br>
+  Advanced search engines’ OSINT tool designed for Hunters
+  <br>
+  Available Engines: Google, Bing & Yahoo
+</h3>
 <p align="center">
-  <img src="https://github.com/thisisiliya/httpr/assets/66384228/5495f1de-eebd-4fb3-a540-3c2af81f248b" width="400px">
-  <br>
-  HTTPR is an OSINT tool to Scrape the Undisclosed Data via Search Engines
-  <br>
-  Available Engines: Google, Bing, Yahoo 
-  <br>
-  <a href="#modes">Modes</a> |
-  <a href="#installation">Installation</a> |
-  <a href="#next-features">Next Features</a> |
+  <a href="#key-features">Key Features</a> .
+  <a href="#installation">Installation</a> .
+  <a href="#modes">Modes</a> .
+  <a href="#usage-guide">Usage Guide</a> .
+  <a href="#next-features">Next Features</a> .
+  <a href="#support">Support</a> .
   <a href="#license">License</a>
 </p>
+
+HTTPR is an advanced fully customizable search engines’ OSINT tool designed especially for security researchers and bug-bounty hunters. This tool aims to be simple and scrape engines using the lowest resources to get the most results possible in the fastest way.
+
+![ray-so](https://github.com/thisisiliya/httpr/assets/66384228/750e3662-38b1-4211-9096-e46a08ec4bce)
+
+# Key Features
+- 3 Available search engines: Google, Bing & Yahoo
+- 4 Available [modes](#modes)
+- Intelligent Dorking
+- Customizable result output
+- Verification support (instead of using httpx)
+- IP ban escape
+
+# Installation
+- Go easy installation:
+```bash
+go install github.com/thisisiliya/httpr@latest
+```
+Note that you need at least *go 1.20v* to compile httpr
+
+- Download the Windows version for [release](https://github.com/thisisiliya/httpr/releases)
+
+- Or compile it from the [Source code](https://github.com/thisisiliya/httpr/releases) file
 
 # Modes
 
@@ -18,10 +45,10 @@
 - [path](#path-mode) - path enumeration for domains
 - [custom](custom-mode) - custom dork command to scrape
 
-![ray-so](https://github.com/thisisiliya/httpr/assets/66384228/750e3662-38b1-4211-9096-e46a08ec4bce)
+## Usage Guide
 
-## `sub` Mode
-### Options
+### `sub` Mode
+#### Options
 ```
 >>> httpr help sub
 algorithmic subdomain enumeration for domain(s)
@@ -41,7 +68,7 @@ Flags:
       --show-sub         show subdomains as result
       --show-url         show URLs as result
 ```
-### Example
+#### Example
 ```
 >>> httpr sub -d hackerone.com -a --silent
 www.hackerone.com
@@ -50,8 +77,8 @@ api.hackerone.com
 ...
 ```
 
-## `key` Mode
-### Options
+### `key` Mode
+#### Options
 ```
 >>> httpr help key
 keyword(s) enumeration for domain(s)
@@ -73,7 +100,7 @@ Flags:
       --show-path         show paths as result
       --show-sub          show subdomains as result
 ```
-### Example
+#### Example
 ```
 >>> httpr key -d hackerone.com -k report --silent
 https://hackerone.com/reports/647130
@@ -82,8 +109,8 @@ https://www.hackerone.com/hacker-powered-security-report-0
 ...
 ```
 
-## `path` Mode
-### Options
+### `path` Mode
+#### Options
 ```
 >>> httpr help path
 path enumeration for domain(s)
@@ -101,7 +128,7 @@ Flags:
   -h, --help             help for path
       --show-path        show paths as result
 ```
-### Example 
+#### Example 
 ```
 >>> httpr path -d hackerone.com --silent
 https://hackerone.com/enter
@@ -110,8 +137,8 @@ https://hackerone.com/rockstargames
 ...
 ```
 
-## `custom` Mode
-### Options
+### `custom` Mode
+#### Options
 ```
 >>> httpr help custom
 engine page(s) scrape by custom dork commands
@@ -133,7 +160,7 @@ Flags:
       --split-by string      dork commands split character (default " ")
   -t, --target-host string   filter result by host
 ```
-### Example
+#### Example
 ```
 >>> httpr custom -c "site:*.hackerone.com inurl:report" --target-host hackerone.com --silent
 https://docs.hackerone.com/en/articles/8475030-report-states
@@ -142,23 +169,14 @@ https://www.hackerone.com/reports/7th-annual-hacker-powered-security-report
 ...
 ```
 
-# Installation
-1. Go easy installation:
-```bash
-go install github.com/thisisiliya/httpr@latest
-```
-Note that you need at least *go 1.20v* to compile httpr
-
-2. Download the Windows version for [release](https://github.com/thisisiliya/httpr/releases)
-
-3. Or compile it from the [Source code](https://github.com/thisisiliya/httpr/releases) file
-
 # Next features
 - More search engines support
 - New modes
 
 # Support
-Support me with a ⭐
+For any questions, bugs, or assistance, feel free to [create an issue](https://github.com/thisisiliya/httpr/issues/new).
+
+You can support this project with a ⭐
 
 # License
 Please visit [License](https://github.com/thisisiliya/httpr/blob/main/LICENSE) file
