@@ -7,7 +7,6 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/thisisiliya/httpr/pkg/engines"
 	"github.com/thisisiliya/httpr/pkg/request"
-	"github.com/thisisiliya/httpr/pkg/request/validate"
 	"github.com/thisisiliya/httpr/pkg/utils"
 	"golang.org/x/exp/slices"
 )
@@ -16,42 +15,45 @@ var customCmd = &cobra.Command{
 	Use:     "custom",
 	Short:   "custom dork command to scrape",
 	Long:    "engine page(s) scrape by custom dork commands",
-	Example: `httpr custom --command "site:www.google.com inurl:map" --target-host google.com --depth 1`,
+	Example: `httpr custom --command "site:*.hackerone.com inurl:report" --target-host hackerone.com --engine Google --depth 1`,
 	Run:     CustomEnum,
 }
 
 func CustomEnum(_ *cobra.Command, _ []string) {
 
-	var data []request.Data
-
-	ctx, cancel1, cancel2 = utils.Start(root_Proxy, root_Silent)
-	defer cancel1()
-	defer cancel2()
+	utils.Start(root_Silent)
 
 	o.MinDelay = i.root_MinDelay
 	o.MaxDelay = i.root_MaxDelay
+
+	o.Browser = request.Browser(root_Proxy)
+	defer o.Browser.MustClose()
+
 	o.Dork.Domain = i.custom_TargetHost
 	o.Dork.Command = strings.ReplaceAll(i.custom_Command, i.custom_SpiltBy, " ")
 
 	switch strings.ToLower(i.custom_Engine) {
 
 	case "google":
-		o.Engines = append(o.Engines, engines.GoogleURLEncode)
+		o.Engines = []request.Engines{{Engine: engines.GoogleURLEncode, Selector: engines.Google_Selector}}
 
 	case "bing":
-		o.Engines = append(o.Engines, engines.BingURLEncode)
+		o.Engines = []request.Engines{{Engine: engines.BingURLEncode, Selector: engines.Bing_Selector}}
 
 	case "yahoo":
-		o.Engines = append(o.Engines, engines.YahooURLEncode)
+		o.Engines = []request.Engines{{Engine: engines.YahooURLEncode, Selector: engines.Yahoo_Selector}}
+
+	default:
+		o.Engines = []request.Engines{}
 	}
+
+	var data []request.Data
 
 	for o.Dork.Page < i.custom_Depth {
 
-		request.Scrape(&o, &data, &wg, &ctx)
+		data = append(data, *request.Scrape(&o)...)
 		o.Dork.Page++
 	}
-
-	wg.Wait()
 
 	for _, d := range data {
 
@@ -83,7 +85,7 @@ func CustomValidate(d *request.Data) bool {
 
 			if i.root_Verify {
 
-				if validate.Verify(d.URL) {
+				if request.Verify(d.URL) {
 
 					results = append(results, d.URL)
 					return true
@@ -104,7 +106,7 @@ func init() {
 	rootCmd.AddCommand(customCmd)
 
 	customCmd.Flags().StringVarP(&i.custom_Command, "command", "c", "", "dork command to scrape")
-	customCmd.Flags().StringVarP(&i.custom_Engine, "engine", "e", "Google", "target engine to scrape. available engines:Google, Bing, Yahoo")
+	customCmd.Flags().StringVarP(&i.custom_Engine, "engine", "e", "Google", "target engine to scrape. available engines: Google, Bing, Yahoo")
 	customCmd.Flags().StringVarP(&i.custom_TargetHost, "target-host", "t", "", "filter result by host")
 	customCmd.Flags().StringVar(&i.custom_SpiltBy, "split-by", " ", "dork commands split character")
 	customCmd.Flags().IntVar(&i.custom_Depth, "depth", 1, "number of pages to scrape")

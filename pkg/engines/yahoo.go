@@ -5,6 +5,8 @@ import (
 	"strconv"
 )
 
+var Yahoo_Selector = "#left a[href]"
+
 func YahooURL(options *Options) string {
 
 	var command string

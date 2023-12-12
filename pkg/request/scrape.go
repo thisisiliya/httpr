@@ -1,7 +1,6 @@
 package request
 
 import (
-	"context"
 	"net/url"
 	"strings"
 	"sync"
@@ -16,39 +15,53 @@ type Data struct {
 	Subdomain string
 }
 
-func Scrape(options *Options, result *[]Data, wg *sync.WaitGroup, ctx *context.Context) {
+func Scrape(options *Options) *[]Data {
 
-	for _, e := range options.Engines {
+	var result []Data
+	var wg_task sync.WaitGroup
+	var wg_time sync.WaitGroup
 
-		wg.Add(1)
-		engine := e
+	wg_time.Add(1)
+
+	go func() {
+
+		time.RandomSleep(options.MinDelay, options.MaxDelay)
+		wg_time.Done()
+	}()
+
+	for _, opt := range options.Engines {
+
+		wg_task.Add(1)
+		opt := opt
 
 		go func() {
 
-			defer wg.Done()
+			defer wg_task.Done()
 
-			URL := engine(&options.Dork)
-			URLs := request(URL, ctx)
+			URLs := request(&opt, &options.Dork, options.Browser)
 
 			for _, newURL := range *URLs {
 
-				if parsedURL, err := url.Parse(newURL); err == nil {
+				if parsed_URL, err := url.Parse(newURL); err == nil {
 
-					if strings.Contains(parsedURL.Host, options.Dork.Domain) {
+					if strings.Contains(parsed_URL.Host, options.Dork.Domain) {
 
-						*result = append(*result, Data{
+						result = append(result, Data{
 							URL:       newURL,
-							Host:      parsedURL.Host,
-							Path:      parsedURL.Path,
-							Subdomain: subdomainExt(parsedURL.Host),
+							Host:      parsed_URL.Host,
+							Path:      parsed_URL.Path,
+							Subdomain: subdomainExt(parsed_URL.Host),
 						})
 					}
 				}
 			}
 		}()
-
-		time.RandomSleep(options.MinDelay, options.MaxDelay)
 	}
+
+	wg_task.Wait()
+	wg_time.Wait()
+
+	return &result
 }
 
 func subdomainExt(host string) string {

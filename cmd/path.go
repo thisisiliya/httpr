@@ -7,8 +7,6 @@ import (
 	"github.com/thisisiliya/go_utils/errors"
 	"github.com/thisisiliya/go_utils/file"
 	"github.com/thisisiliya/httpr/pkg/request"
-	"github.com/thisisiliya/httpr/pkg/engines"
-	"github.com/thisisiliya/httpr/pkg/request/validate"
 	"github.com/thisisiliya/httpr/pkg/utils"
 	"golang.org/x/exp/slices"
 )
@@ -23,17 +21,13 @@ var pathCmd = &cobra.Command{
 
 func PathExt(_ *cobra.Command, _ []string) {
 
-	ctx, cancel1, cancel2 = utils.Start(root_Proxy, root_Silent)
-	defer cancel1()
-	defer cancel2()
+	utils.Start(root_Silent)
 
 	o.MinDelay = i.root_MinDelay
 	o.MaxDelay = i.root_MaxDelay
-	o.Engines = append(o.Engines,
-		engines.GoogleURL,
-		engines.BingURL,
-		engines.YahooURL,
-	)
+
+	o.Browser = request.Browser(root_Proxy)
+	defer o.Browser.MustClose()
 
 	switch {
 
@@ -60,11 +54,9 @@ func PathEnum() {
 
 	for o.Dork.Page < i.path_Depth {
 
-		request.Scrape(&o, &data, &wg, &ctx)
+		data = append(data, *request.Scrape(&o)...)
 		o.Dork.Page++
 	}
-
-	wg.Wait()
 
 	for _, d := range data {
 
@@ -90,7 +82,7 @@ func PathValidate(data *request.Data) bool {
 
 			if i.root_Verify {
 
-				if validate.Verify(data.URL) {
+				if request.Verify(data.URL) {
 
 					results = append(results, data.Path)
 					return true

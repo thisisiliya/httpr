@@ -5,6 +5,8 @@ import (
 	"strconv"
 )
 
+var Bing_Selector = "#b_results a[href]"
+
 func BingURL(options *Options) string {
 
 	var command string

@@ -6,9 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/thisisiliya/go_utils/errors"
 	"github.com/thisisiliya/go_utils/file"
-	"github.com/thisisiliya/httpr/pkg/engines"
 	"github.com/thisisiliya/httpr/pkg/request"
-	"github.com/thisisiliya/httpr/pkg/request/validate"
 	"github.com/thisisiliya/httpr/pkg/utils"
 	"golang.org/x/exp/slices"
 )
@@ -21,25 +19,22 @@ var (
 		Use:     "sub",
 		Short:   "algorithmic subdomain enumeration for domains",
 		Long:    "algorithmic subdomain enumeration for domain(s)",
-		Example: "httpr sub --domain google.com --all",
+		Example: "httpr sub --domain hackerone.com --all",
 		Run:     SubExt,
 	}
 )
 
 func SubExt(_ *cobra.Command, _ []string) {
 
-	ctx, cancel1, cancel2 = utils.Start(root_Proxy, root_Silent)
-	defer cancel1()
-	defer cancel2()
+	utils.Start(root_Silent)
 
 	o.MinDelay = i.root_MinDelay
 	o.MaxDelay = i.root_MaxDelay
+
+	o.Browser = request.Browser(root_Proxy)
+	defer o.Browser.MustClose()
+
 	o.Dork.Wildcard = true
-	o.Engines = append(o.Engines,
-		engines.GoogleURL,
-		engines.BingURL,
-		engines.YahooURL,
-	)
 
 	switch {
 
@@ -116,8 +111,7 @@ func SubScrape() {
 
 	for o.Dork.Page < i.sub_Depth {
 
-		request.Scrape(&o, &data, &wg, &ctx)
-		wg.Wait()
+		data = *request.Scrape(&o)
 
 		for _, d := range data {
 
@@ -139,8 +133,6 @@ func SubScrape() {
 
 		o.Dork.Page++
 	}
-
-	data = []request.Data{}
 }
 
 func SubValidate(d *request.Data) bool {
@@ -151,7 +143,7 @@ func SubValidate(d *request.Data) bool {
 
 			if i.root_Verify {
 
-				if validate.Verify(d.URL) {
+				if request.Verify(d.URL) {
 
 					results = append(results, d.Subdomain)
 					return true

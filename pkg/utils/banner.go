@@ -1,6 +1,7 @@
 package utils
 
-const BANNER = ` __  __   ______  ______  ______  ______   
+const BANNER = ` 
+ __  __   ______  ______  ______  ______   
 /\ \_\ \ /\__  _\/\__  _\/\  == \/\  == \  
 \ \  __ \\/_/\ \/\/_/\ \/\ \  _-/\ \  __<  
  \ \_\ \_\  \ \_\   \ \_\ \ \_\   \ \_\ \_\
@@ -8,4 +9,4 @@ const BANNER = ` __  __   ______  ______  ______  ______
                  by Iliya;)
 `
 
-const VERSION = "httpr version v1.0.0"
+const VERSION = "httpr version v1.1.0"

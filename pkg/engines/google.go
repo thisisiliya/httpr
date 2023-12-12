@@ -5,6 +5,8 @@ import (
 	"strconv"
 )
 
+var Google_Selector = "#center_col a[href]"
+
 func GoogleURL(options *Options) string {
 
 	var command string

@@ -1,31 +1,28 @@
 package request
 
 import (
-	"context"
 	"net/url"
 
-	"github.com/chromedp/cdproto/cdp"
-	"github.com/chromedp/chromedp"
-	"github.com/thisisiliya/go_utils/errors"
+	"github.com/go-rod/rod"
+	"github.com/go-rod/stealth"
+	"github.com/thisisiliya/httpr/pkg/engines"
 )
 
-func request(URL string, ctx *context.Context) *[]string {
+func request(options *Engines, dork *engines.Options, browser *rod.Browser) *[]string {
 
 	var result []string
-	var nodes  []*cdp.Node
 
-	err := chromedp.Run(
+	page := stealth.MustPage(browser)
+	defer page.Close()
 
-		*ctx,
-		chromedp.Navigate(URL),
-		chromedp.Nodes("a[href]", &nodes),
-	)
+	page.MustNavigate(options.Engine(dork)).MustWaitStable()
 
-	errors.Check(err)
+	links := page.MustElements(options.Selector)
 
-	for _, n := range nodes {
+	for _, link := range links {
 
-		u, err := url.ParseRequestURI(n.AttributeValue("href"))
+		href := link.MustAttribute("href")
+		u, err := url.ParseRequestURI(*href)
 
 		if err == nil && u.Scheme != "" {
 

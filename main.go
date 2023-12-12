@@ -17,6 +17,5 @@ iliyahashemkhani@gmail.com
 */
 
 func main() {
-	
 	cmd.Execute()
 }

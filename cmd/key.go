@@ -6,9 +6,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/thisisiliya/go_utils/errors"
 	"github.com/thisisiliya/go_utils/file"
-	"github.com/thisisiliya/httpr/pkg/engines"
 	"github.com/thisisiliya/httpr/pkg/request"
-	"github.com/thisisiliya/httpr/pkg/request/validate"
 	"github.com/thisisiliya/httpr/pkg/utils"
 	"golang.org/x/exp/slices"
 )
@@ -17,23 +15,19 @@ var keyCmd = &cobra.Command{
 	Use:     "key",
 	Short:   "keywords enumeration for domains",
 	Long:    "keyword(s) enumeration for domain(s)",
-	Example: "httpr key --domain www.google.com --keyword exploit --depth 3",
+	Example: "httpr key --domain hackerone.com --keyword report --depth 3",
 	Run:     KeyExt,
 }
 
 func KeyExt(_ *cobra.Command, _ []string) {
 
-	ctx, cancel1, cancel2 = utils.Start(root_Proxy, root_Silent)
-	defer cancel1()
-	defer cancel2()
+	utils.Start(root_Silent)
 
 	o.MinDelay = i.root_MinDelay
 	o.MaxDelay = i.root_MaxDelay
-	o.Engines = append(o.Engines,
-		engines.GoogleURL,
-		engines.BingURL,
-		engines.YahooURL,
-	)
+
+	o.Browser = request.Browser(root_Proxy)
+	defer o.Browser.MustClose()
 
 	switch {
 
@@ -100,11 +94,9 @@ func KeyEnum() {
 
 	for o.Dork.Page < i.key_Depth {
 
-		request.Scrape(&o, &data, &wg, &ctx)
+		data = append(data, *request.Scrape(&o)...)
 		o.Dork.Page++
 	}
-
-	wg.Wait()
 
 	for _, d := range data {
 
@@ -136,7 +128,7 @@ func KeyValidate(data *request.Data) bool {
 
 			if i.root_Verify {
 
-				if validate.Verify(data.URL) {
+				if request.Verify(data.URL) {
 
 					results = append(results, data.URL)
 					return true
@@ -155,8 +147,6 @@ func KeyValidate(data *request.Data) bool {
 func init() {
 
 	rootCmd.AddCommand(keyCmd)
-
-	keyCmd.AddGroup()
 
 	keyCmd.Flags().StringVarP(&i.key_Domain, "domain", "d", "", "target domain to search keyword(s)")
 	keyCmd.Flags().StringVar(&i.key_Domains, "domains", "", "target domains file path")
