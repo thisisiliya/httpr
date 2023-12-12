@@ -1,5 +1,5 @@
 <h3 align="center">
-  <img src="https://github.com/thisisiliya/httpr/assets/66384228/5495f1de-eebd-4fb3-a540-3c2af81f248b" width="500px">
+  <img src="https://github.com/thisisiliya/httpr/assets/66384228/5495f1de-eebd-4fb3-a540-3c2af81f248b" width="400px">
   <br>
   Advanced search engines’ OSINT tool designed for Hunters
 </h3>
@@ -12,7 +12,7 @@
   <a href="#license">License</a>
 </p>
 
-HTTPR is an advanced fully customizable search engines’ OSINT tool designed especially for security researchers and bug-bounty hunters. This tool aims to be simple and scrape engines using the lowest resources to get the most results possible in the fastest way.
+HTTPR is an advanced fully customizable search engines’ OSINT tool designed especially for security researchers and bug-bounty hunters. This tool aims to be simple and scrape search engines using the lowest resources to get the most results possible in the fastest way.
 
 ![ray-so](https://github.com/thisisiliya/httpr/assets/66384228/750e3662-38b1-4211-9096-e46a08ec4bce)
 
@@ -20,6 +20,7 @@ HTTPR is an advanced fully customizable search engines’ OSINT tool designed es
 - 3 Available search engines: Google, Bing & Yahoo
 - 4 Available [modes](#modes)
 - Intelligent Dorking
+- Multi-threading by default
 - Customizable result output
 - Verification support (instead of using httpx)
 - IP ban escape
@@ -27,13 +28,19 @@ HTTPR is an advanced fully customizable search engines’ OSINT tool designed es
 # Installation
 - Go easy installation:
 ```bash
-go install github.com/thisisiliya/httpr@latest
+go install -v github.com/thisisiliya/httpr@latest
 ```
-Note that you need at least *go 1.20v* to compile httpr
 
-- Download the Windows version for [release](https://github.com/thisisiliya/httpr/releases)
+- Compiling
 
-- Or compile it from the [Source code](https://github.com/thisisiliya/httpr/releases) file
+You can compile httpr from [source code](https://github.com/thisisiliya/httpr/releases)
+```bash
+go get && go build
+```
+
+- Or download the Windows version from [release](https://github.com/thisisiliya/httpr/releases)
+
+Note that you need at least ***go 1.18v*** to compile httpr
 
 # Modes
 
@@ -169,7 +176,7 @@ https://www.hackerone.com/reports/7th-annual-hacker-powered-security-report
 - New modes
 
 # Support
-For any questions, bugs, or assistance, feel free to [create an issue](https://github.com/thisisiliya/httpr/issues/new).
+For any questions, bugs, or assistance, feel free to [create an issue](https://github.com/thisisiliya/httpr/issues/new)
 
 You can support this project with a ⭐
 
