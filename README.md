@@ -16,6 +16,12 @@ HTTPR is an advanced fully customizable search engines’ OSINT tool designed es
 
 ![ray-so](https://github.com/thisisiliya/httpr/assets/66384228/750e3662-38b1-4211-9096-e46a08ec4bce)
 
+HTTPR is a tool used for:
+- **subdomain** enumuration
+- special **keyword** enumeration
+- web **path** enumeration
+- using custom dork command
+
 # Key Features
 - 3 Available search engines: Google, Bing & Yahoo
 - 4 Available [modes](#modes)
