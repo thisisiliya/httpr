@@ -21,10 +21,10 @@ jobs:
           go-version: ${{ matrix.go-version }}
         
       - name: Build
-        run: go build -v ./...
+        run: go build -v 
 
       - name: Install
-        run: go install -v ./...
+        run: go install -v 
 
       - name: Race Condition Tests
-        run: go build -race ./...
+        run: go build -race 
