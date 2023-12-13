@@ -20,9 +20,6 @@ jobs:
         with:
           go-version: ${{ matrix.go-version }}
 
-      - name: Check out code
-        uses: actions/checkout@v3
-
       - name: Get
         run: go get -v ./...
         
