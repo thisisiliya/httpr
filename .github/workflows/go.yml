@@ -34,3 +34,11 @@ jobs:
 
       - name: Race Condition Tests
         run: go build -race ./...
+
+      - name: Build the Docker image
+        run: |
+          docker build --platform=local -t thisisiliya/httpr:latest .
+          docker push thisisiliya/httpr:latest
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
