@@ -9,4 +9,4 @@ const BANNER = `
                  by Iliya;)
 `
 
-const VERSION = "httpr version v1.1.0"
+const VERSION = "httpr version v1.2.0"

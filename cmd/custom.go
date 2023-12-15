@@ -26,7 +26,7 @@ func CustomEnum(_ *cobra.Command, _ []string) {
 	o.MinDelay = i.root_MinDelay
 	o.MaxDelay = i.root_MaxDelay
 
-	o.Browser = request.Browser(root_Proxy)
+	o.Browser = request.Browser(root_Proxy, root_Timeout, root_Chromium)
 	defer o.Browser.MustClose()
 
 	o.Dork.Domain = i.custom_TargetHost
@@ -42,6 +42,9 @@ func CustomEnum(_ *cobra.Command, _ []string) {
 
 	case "yahoo":
 		o.Engines = []request.Engines{{Engine: engines.YahooURLEncode, Selector: engines.Yahoo_Selector}}
+
+	case "yandex":
+		o.Engines = []request.Engines{{Engine: engines.YandexURLEncode, Selector: engines.Yandex_Selector}}
 
 	default:
 		o.Engines = []request.Engines{}

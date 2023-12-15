@@ -26,7 +26,7 @@ func KeyExt(_ *cobra.Command, _ []string) {
 	o.MinDelay = i.root_MinDelay
 	o.MaxDelay = i.root_MaxDelay
 
-	o.Browser = request.Browser(root_Proxy)
+	o.Browser = request.Browser(root_Proxy, root_Timeout, root_Chromium)
 	defer o.Browser.MustClose()
 
 	switch {
