@@ -1,7 +1,7 @@
 <h3 align="center">
   <img src="https://github.com/thisisiliya/httpr/assets/66384228/5495f1de-eebd-4fb3-a540-3c2af81f248b" width="400px">
   <br>
-  Advanced search engines’ OSINT tool designed for Hunters
+  Automated Dork scanner designed for Hunters
 </h3>
 <p align="center">
   <a href="#key-features">Key Features</a> .
@@ -12,18 +12,18 @@
   <a href="#license">License</a>
 </p>
 
-HTTPR is an advanced fully customizable search engines’ OSINT tool designed especially for security researchers and bug-bounty hunters. This tool aims to be simple and scrape search engines using the lowest resources to get the most results possible in the fastest way.
+`httpr` is an advanced fully customizable search engines’ OSINT tool designed especially for security researchers and bug-bounty hunters. This tool aims to be simple and scrape search engines using the lowest resources to get the most results possible in the fastest way.
 
 ![ray-so](https://github.com/thisisiliya/httpr/assets/66384228/750e3662-38b1-4211-9096-e46a08ec4bce)
 
-HTTPR is a tool used for:
-- **subdomain** enumuration
-- special **keyword** enumeration
-- web **path** enumeration
-- using custom dork command
+`httpr` is a tool used for:
+- Algorithmic **subdomain** enumuration
+- special **keywords** enumeration
+- web **paths** enumeration
+- Custom **dork command** enumeration
 
 # Key Features
-- 3 Available search engines: Google, Bing & Yahoo
+- 4 Available search engines: Google, Bing, Yahoo & Yandex
 - 4 Available [modes](#modes)
 - Intelligent Dorking
 - Multi-threading by default
@@ -32,21 +32,31 @@ HTTPR is a tool used for:
 - IP ban escape
 
 # Installation
-- Go easy installation:
+- ### Go easy installation:
 ```bash
 go install -v github.com/thisisiliya/httpr@latest
 ```
 
-- Compiling
+- ### Compiling
+You can compile `httpr` from [source code](https://github.com/thisisiliya/httpr/releases).
 
-You can compile httpr from [source code](https://github.com/thisisiliya/httpr/releases)
+After unzipping it, use:
 ```bash
 go get && go build
 ```
 
-- Or download the Windows version from [release](https://github.com/thisisiliya/httpr/releases)
+You can install it with:
+```bash
+go install
+```
+Note that you need at least ***go 1.18v*** to compile `httpr`
 
-Note that you need at least ***go 1.18v*** to compile httpr
+- ### Docker
+```bash
+docker pull ghcr.io/thisisiliya/httpr
+```
+
+- ### Or download the Windows version from [release](https://github.com/thisisiliya/httpr/releases)
 
 # Modes
 
@@ -182,6 +192,8 @@ https://www.hackerone.com/reports/7th-annual-hacker-powered-security-report
 - New modes
 
 # Support
+If you have any problem with `httpr`, maybe you can find out your answer on [wiki](https://github.com/thisisiliya/httpr/wiki/Issues)
+
 For any questions, bugs, or assistance, feel free to [create an issue](https://github.com/thisisiliya/httpr/issues/new)
 
 You can support this project with a ⭐
